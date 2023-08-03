@@ -95,7 +95,6 @@ jobs:
     - name: Build extension
       env:
         GEN: ninja
-        STATIC_LIBCPP: 1
         CC: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-gcc' || '' }}
         CXX: ${{ matrix.duckdb_arch == 'linux_arm64' && 'aarch64-linux-gnu-g++' || '' }}
       run: |
