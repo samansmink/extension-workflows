@@ -16,6 +16,11 @@ on:
         required: false
         type: boolean
         default: true
+      # Json formatted list of excluded target architectures, e.g. "[ 'linux_amd64', 'linux_amd64_gcc4' ]"
+      exclude_archs:
+        required: false
+        type: string
+        default: "[]"
 
 defaults:
   run:
@@ -39,6 +44,7 @@ jobs:
           - duckdb_arch: 'linux_arm64'
             container: 'ubuntu:18.04'
             vcpkg_triplet: 'arm64-linux'
+        exclude: ${{ fromJson(inputs.exclude_archs) }}
     env:
       VCPKG_TARGET_TRIPLET: ${{ matrix.vcpkg_triplet }}
       VCPKG_TOOLCHAIN_PATH: ${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
