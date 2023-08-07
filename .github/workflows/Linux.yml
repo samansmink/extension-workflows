@@ -66,6 +66,7 @@ jobs:
         git --version
         
     - name: Setup Ccache
+      if: ${{ matrix.duckdb_arch != 'linux_amd64_gcc4' }}
       uses: hendrikmuhs/ccache-action@main
       with:
         key: ${{ github.job }}-${{ inputs.duckdb_version }}
