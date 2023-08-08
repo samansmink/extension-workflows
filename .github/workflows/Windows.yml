@@ -54,7 +54,7 @@ jobs:
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
         with:
-          key: ${{ github.job }}-${{ inputs.duckdb_version }}
+          key: ${{ github.job }}-${{ matrix.duckdb_arch }}
 
       - name: Build extension
         run: |
