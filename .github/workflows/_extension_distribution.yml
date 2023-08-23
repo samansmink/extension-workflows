@@ -11,6 +11,11 @@ on:
       extension_name:
         required: true
         type: string
+      # DuckDB version to build against
+      duckdb_version:
+        required: false
+        type: string
+        default: '<submodule_version>'
       # Whether the extension is deployed to the specified s3 bucket TODO: replace with GHA deploy
       release_s3:
         required: false
@@ -29,6 +34,7 @@ jobs:
     with:
       extension_name: ${{ inputs.extension_name }}
       excluded_archs: ${{ inputs.exclude_archs }}
+      duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
 
   macos-build:
@@ -37,6 +43,7 @@ jobs:
     with:
       extension_name: ${{ inputs.extension_name }}
       excluded_archs: ${{ inputs.exclude_archs }}
+      duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
 
   windows-build:
@@ -45,4 +52,5 @@ jobs:
     with:
       extension_name: ${{ inputs.extension_name }}
       excluded_archs: ${{ inputs.exclude_archs }}
+      duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
