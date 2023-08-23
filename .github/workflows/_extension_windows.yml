@@ -1,4 +1,6 @@
-name: MacOS
+# This is a reusable workflow to be used by extensions for CI
+# - called by .github/workflows/_extension_distribution.yml
+name: Windows
 on:
   workflow_call:
     inputs:
@@ -21,24 +23,17 @@ defaults:
     shell: bash
 
 jobs:
-  macos:
-    name: Release (${{ matrix.duckdb_arch }})
-    runs-on: macos-latest
+  windows:
+    name: Release
+    runs-on: windows-latest
     strategy:
       matrix:
-        vcpkg_triplet: [ 'x64-osx', 'arm64-osx' ]
+        # Add commits/tags to build against other DuckDB versions
+        duckdb_arch: [ 'windows_amd64' ]
         include:
-          - vcpkg_triplet: 'x64-osx'
-            osx_build_arch: 'x86_64'
-            duckdb_arch: 'osx_amd64'
-          - vcpkg_triplet: 'arm64-osx'
-            osx_build_arch: 'arm64'
-            duckdb_arch: 'osx_arm64'
-
+          - duckdb_arch: 'windows_amd64'
+            vcpkg_triplet: 'x64-windows-static-md'
     env:
-      VCPKG_TOOLCHAIN_PATH: ${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
-      VCPKG_TARGET_TRIPLET: ${{ matrix.vcpkg_triplet }}
-      OSX_BUILD_ARCH: ${{ matrix.osx_build_arch }}
       GEN: Ninja
 
     steps:
@@ -47,36 +42,27 @@ jobs:
           fetch-depth: 0
           submodules: 'true'
 
-      - name: Install Ninja
-        run: brew install ninja
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+
+      - name: Checkout DuckDB to version
+        # Add commits/tags to build against other DuckDB versions
+        if: ${{ inputs.duckdb_version != '<submodule_version>'}}
+        run: |
+          cd duckdb
+          git checkout ${{ inputs.duckdb_version }}
 
       - name: Setup Ccache
         uses: hendrikmuhs/ccache-action@main
         with:
           key: ${{ github.job }}-${{ matrix.duckdb_arch }}
 
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.7'
-
-      - name: Checkout DuckDB to version
-        if: ${{ inputs.duckdb_version != '<submodule_version>'}}
-        run: |
-          cd duckdb
-          git checkout ${{ inputs.duckdb_version }}
-          
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-        with:
-          vcpkgGitCommitId: 501db0f17ef6df184fcdbfbe0f87cde2313b6ab1
-
       - name: Build extension
-        shell: bash
         run: |
           make release
 
       - name: Test Extension
-        if: ${{ matrix.osx_build_arch == 'x86_64'}}
         shell: bash
         run: |
           make test
@@ -94,9 +80,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.S3_DEPLOY_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.S3_REGION }}
           BUCKET_NAME: ${{ secrets.S3_BUCKET }}
-          DUCKDB_EXTENSION_SIGNING_PK: ${{ secrets.DUCKDB_EXTENSION_SIGNING_KEY }}
         run: |
-          git config --global --add safe.directory '*'
           cd duckdb
           git fetch --tags
           export DUCKDB_VERSION=`git tag --points-at HEAD`
@@ -105,9 +89,9 @@ jobs:
           if [[ "$AWS_ACCESS_KEY_ID" == "" ]] ; then
             echo 'No key set, skipping'
           elif [[ "$GITHUB_REF" =~ ^(refs/tags/v.+)$ ]] ; then
-            python3 -m pip install pip awscli
-            ./scripts/extension-upload.sh ${{ inputs.extension_name }} ${{ github.ref_name }} $DUCKDB_VERSION ${{matrix.duckdb_arch}} $BUCKET_NAME true
+            python -m pip install awscli
+            ./scripts/extension-upload.sh ${{ inputs.extension_name }} ${{ github.ref_name }} $DUCKDB_VERSION ${{ matrix.duckdb_arch }} $BUCKET_NAME true 
           elif [[ "$GITHUB_REF" =~ ^(refs/heads/main)$ ]] ; then
-            python3 -m pip install pip awscli
-            ./scripts/extension-upload.sh ${{ inputs.extension_name }} `git log -1 --format=%h` $DUCKDB_VERSION ${{matrix.duckdb_arch}} $BUCKET_NAME false
+            python -m pip install awscli
+            ./scripts/extension-upload.sh ${{ inputs.extension_name }} `git log -1 --format=%h` $DUCKDB_VERSION ${{ matrix.duckdb_arch }} $BUCKET_NAME false 
           fi

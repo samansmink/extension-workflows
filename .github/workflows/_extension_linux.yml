@@ -1,3 +1,5 @@
+# This is a reusable workflow to be used by extensions for CI.
+# - called by .github/workflows/_extension_distribution.yml
 name: Linux
 on:
   workflow_call:
@@ -51,7 +53,6 @@ jobs:
       GEN: Ninja
 
     steps:
-    # TODO add cancel specific builds based on https://stackoverflow.com/questions/60589373/how-to-force-to-exit-in-github-actions-step?
     - name: Install required ubuntu packages
       if: ${{ matrix.duckdb_arch == 'linux_amd64' || matrix.duckdb_arch == 'linux_arm64' }}
       run: |
