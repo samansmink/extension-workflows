@@ -33,7 +33,7 @@ jobs:
     uses: ./.github/workflows/_extension_linux.yml
     with:
       extension_name: ${{ inputs.extension_name }}
-      excluded_archs: ${{ inputs.exclude_archs }}
+      exclude_archs: ${{ inputs.exclude_archs }}
       duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
 
@@ -42,7 +42,7 @@ jobs:
     uses: ./.github/workflows/_extension_macos.yml
     with:
       extension_name: ${{ inputs.extension_name }}
-      excluded_archs: ${{ inputs.exclude_archs }}
+      exclude_archs: ${{ inputs.exclude_archs }}
       duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
 
@@ -51,6 +51,6 @@ jobs:
     uses: ./.github/workflows/_extension_windows.yml
     with:
       extension_name: ${{ inputs.extension_name }}
-      excluded_archs: ${{ inputs.exclude_archs }}
+      exclude_archs: ${{ inputs.exclude_archs }}
       duckdb_version: ${{ inputs.duckdb_version }}
     secrets: inherit
