@@ -18,6 +18,11 @@ on:
         required: false
         type: boolean
         default: true
+      # Json formatted list of excluded target architectures, e.g. "[ 'linux_amd64', 'linux_amd64_gcc4' ]"
+      exclude_archs:
+        required: false
+        type: string
+        default: "[]"
 defaults:
   run:
     shell: bash
@@ -33,6 +38,7 @@ jobs:
         include:
           - duckdb_arch: 'windows_amd64'
             vcpkg_triplet: 'x64-windows-static-md'
+        exclude: ${{ fromJson(inputs.exclude_archs) }}
     env:
       GEN: Ninja
 
